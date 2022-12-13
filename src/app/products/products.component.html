@@ -10,6 +10,17 @@
       Products List
     </div>
     <div class="card-body">
+
+      <form [formGroup]="searchFormGroup" (ngSubmit)="handleSearchProducts()">
+        <div class="input-group">
+          <label class="input-group-text">keyword</label>
+          <input class="form-control" type="text" formControlName="keyword">
+          <button class="btn btn-outline-primary">
+            <i class="bi bi-search"></i>
+          </button>
+        </div>
+      </form>
+
       <table class="table table-hover  table-sm" cellspacing="0" width="100%">
         <thead>
           <tr>

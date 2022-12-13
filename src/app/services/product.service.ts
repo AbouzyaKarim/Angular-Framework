@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import {Observable, of, throwError} from "rxjs";
 import {Product} from "../model/product.model";
+import {UUID} from "angular2-uuid";
 
 @Injectable({
   providedIn: 'root'
@@ -10,11 +11,17 @@ export class ProductService {
 
   constructor() {
     this.products = [
-      {id:0,name:"Computer",price:6500,promotion:true},
-      {id:1,name:"Printer",price:1500,promotion:false},
-      {id:2,name:"Souris",price:650,promotion:true},
-      {id:3,name:"Smart Phone",price:9050,promotion:false}
+      {id:UUID.UUID(),name:"Computer",price:6500,promotion:true},
+      {id:UUID.UUID(),name:"Printer",price:1500,promotion:false},
+      {id:UUID.UUID(),name:"Souris",price:650,promotion:true},
+      {id:UUID.UUID(),name:"Smart Phone",price:9050,promotion:false}
     ];
+
+    for (let i = 0; i < 10; i++) {
+      this.products.push({id:UUID.UUID(),name:"Computer",price:6500,promotion:true});
+      this.products.push({id:UUID.UUID(),name:"Compu",price:6500,promotion:true});
+      this.products.push({id:UUID.UUID(),name:"Computer",price:6500,promotion:true});
+    }
   }
 
   public getAllProducts() : Observable<Array<any>>{
@@ -27,12 +34,12 @@ export class ProductService {
     return this.products.find(p);
   }
 
-  public deleteProduct(id : number) : Observable<boolean>{
+  public deleteProduct(id : string) : Observable<boolean>{
     this.products=this.products.filter(p=>p.id!=id);
     return of(true);
   }
 
-  public setPromotion(id : number) : Observable<boolean>{
+  public setPromotion(id : string) : Observable<boolean>{
     let product=this.products.find(p=>p.id==id);
     if(product != undefined){
       product.promotion = !product.promotion;
@@ -40,6 +47,11 @@ export class ProductService {
     }else{
       return throwError(()=> new Error("Product not found"));
     }
+  }
 
+  public SearchProducts(keyword:string) : Observable<Array<Product>>{
+    let products = this.products.filter(p=>p.name.includes(keyword));
+
+    return of(products);
   }
 }
