@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import {Observable, of, throwError} from "rxjs";
-import {Product} from "../model/product.model";
+import {PageProduct, Product} from "../model/product.model";
 import {UUID} from "angular2-uuid";
 
 @Injectable({
@@ -24,10 +24,19 @@ export class ProductService {
     }
   }
 
-  public getAllProducts() : Observable<Array<any>>{
-    let rad=Math.random();
-    if(rad<0.1) return throwError(() => new Error("Internet connexion error"));
-    else return of(this.products);
+  public getPageProducts(page: number , size : number) : Observable<PageProduct>{
+    let index = page*size;
+    let totalPage = ~~(this.products.length/size);
+    if(this.products.length % size !=0){
+      totalPage++;
+    }
+    let pageProducts = this.products.slice(index, index+size);
+    return of({page:page,size:size,totalPages:totalPage,products:pageProducts});
+  }
+
+  public getAllProducts() : Observable<Product[]>{
+    this.products=this.products;
+    return of(this.products);
   }
 
   public getProductById(p : any){
@@ -49,9 +58,15 @@ export class ProductService {
     }
   }
 
-  public SearchProducts(keyword:string) : Observable<Array<Product>>{
+  public SearchProducts(keyword:string, page:number,size:number) : Observable<PageProduct>{
     let products = this.products.filter(p=>p.name.includes(keyword));
+    let index = page*size;
+    let totalPage = ~~(products.length/size);
+    if(this.products.length % size !=0){
+      totalPage++;
+    }
+    let pageProducts = products.slice(index, index+size);
 
-    return of(products);
+    return of({page:page,size:size,totalPages:totalPage,products:pageProducts});
   }
 }

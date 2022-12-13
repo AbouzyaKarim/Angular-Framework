@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import {ProductService} from "../services/product.service";
-import {Product} from "../model/product.model";
+import {PageProduct, Product} from "../model/product.model";
 import {FormBuilder, FormGroup} from "@angular/forms";
 
 @Component({
@@ -11,8 +11,13 @@ import {FormBuilder, FormGroup} from "@angular/forms";
 export class ProductsComponent implements OnInit {
 
   products! : Array<Product>;
+  pageProducts! : PageProduct[];
+  currentPage:number=0;
+  pageSize:number=5;
+  totalPages!:number;
   errorMessages! : string;
   searchFormGroup! : FormGroup;
+  modeSearch : string="All";
 
   constructor(private fb:FormBuilder,private productService:ProductService) { }
 
@@ -20,9 +25,21 @@ export class ProductsComponent implements OnInit {
     this.searchFormGroup = this.fb.group({
       keyword : this.fb.control(null)
     });
-    this.getAllProducts();
+    this.getPageProducts();
   }
 
+  getPageProducts(){
+    this.productService.getPageProducts(this.currentPage,this.pageSize).subscribe({
+      next: (data) => {
+        this.products = data.products;
+        this.totalPages=data.totalPages;
+        console.log(this.totalPages);
+      },
+      error: (err) => {
+        this.errorMessages = err;
+      }
+    });
+  }
 
   getAllProducts(){
     this.productService.getAllProducts().subscribe({
@@ -60,13 +77,25 @@ export class ProductsComponent implements OnInit {
   }
 
   handleSearchProducts() {
+    this.modeSearch="search";
     let keyword = this.searchFormGroup.value.keyword;
-    this.productService.SearchProducts(keyword).subscribe({
+    this.currentPage=0;
+    this.productService.SearchProducts(keyword,this.currentPage,this.pageSize).subscribe({
       next: (data)=>{
-        this.products=data;
+        this.products=data.products;
+        this.totalPages=data.totalPages;
+
       },error: (err)=>{
         this.errorMessages=err;
       }
     })
+  }
+
+  gotoPage(i: number) {
+    this.currentPage=i;
+    if(this.modeSearch==="All"){
+      this.getPageProducts();
+    }
+    else this.handleSearchProducts();
   }
 }
