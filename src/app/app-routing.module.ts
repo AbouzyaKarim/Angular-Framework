@@ -2,14 +2,30 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import {CustomersComponent} from "./customers/customers.component";
 import {ProductsComponent} from "./products/products.component";
+import {LoginComponent} from "./login/login.component";
+import {AdminTemplateComponent} from "./admin-template/admin-template.component";
+import {AuthentificationGuard} from "./guards/authentification.guard";
 
 const routes: Routes = [
+
   {
-    path:"customers",component:CustomersComponent
+    path:"login",component: LoginComponent
   },
   {
-    path:"products",component: ProductsComponent
+    path:"",component: LoginComponent
+  },
+  {
+    path:"admin",component: AdminTemplateComponent,children : [
+      {
+        path:"customers",component:CustomersComponent
+      },
+      {
+        path:"products",component: ProductsComponent
+      }
+
+    ],canActivate: [AuthentificationGuard]
   }
+
 ];
 
 @NgModule({
