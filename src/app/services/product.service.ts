@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import {Observable, of, throwError} from "rxjs";
 import {PageProduct, Product} from "../model/product.model";
 import {UUID} from "angular2-uuid";
+import {ValidationErrors} from "@angular/forms";
 
 @Injectable({
   providedIn: 'root'
@@ -39,9 +40,20 @@ export class ProductService {
     return of(this.products);
   }
 
-  public getProductById(p : any){
+  public getProduct(p : any){
     return this.products.find(p);
   }
+
+  public getProductById(id : string) : Observable<Product>{
+    let product = this.products.find(p => p.id ==id);
+    if(product==undefined){
+      return throwError(()=>new Error("Product not Found"));
+    }
+    return of(product);
+
+  }
+
+
 
   public deleteProduct(id : string) : Observable<boolean>{
     this.products=this.products.filter(p=>p.id!=id);
@@ -68,5 +80,28 @@ export class ProductService {
     let pageProducts = products.slice(index, index+size);
 
     return of({page:page,size:size,totalPages:totalPage,products:pageProducts});
+  }
+
+  public addNewProduct(product : Product) : Observable<Product>{
+    product.id=UUID.UUID();
+
+    this.products.push(product);
+    return of(product);
+  }
+
+  getErrorMessage(fieldName: string, errors: ValidationErrors) {
+    if(errors['required']){
+      return fieldName + " is Required";
+    }else if (errors['minlength']){
+      return fieldName+" should have at least " + errors['minlength']['requiredLength']+" Characters";
+    }else if (errors['min']){
+      return fieldName+" should have minimum " + errors['min']['min']+" Dh";
+    }
+    else  return "";
+  }
+
+  public updateProduct(product: Product) : Observable<Product>{
+    this.products = this.products.map(p=>(p.id==product.id)?product:p);
+    return of(product);
   }
 }
